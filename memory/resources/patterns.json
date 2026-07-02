@@ -1348,6 +1348,51 @@
         "  3. 完成项目后 → 记录项目偏好供下次参考"
       ],
       "notes": "用户不需要每次重复说明自己是谁、想要什么。记住一次，每次都按这个来。用户说'我不是说过了吗' → 说明老子没记，这是严重失职"
+    },
+    {
+      "id": "computer-use-capability",
+      "category": "自动化",
+      "description": "电脑操控能力层 - 截图/鼠标/键盘/浏览器控制，对标Codex CLI",
+      "steps": [
+        "能力清单：",
+        "",
+        "1. 截图（看屏幕）：",
+        "   PYTHONIOENCODING=utf-8 python3 memory/code/computer_use.py screenshot",
+        "   截图存到 ~/computer_use_screenshots/",
+        "   老子可以看图分析界面上有什么",
+        "",
+        "2. 鼠标控制（点按钮）：",
+        "   python3 memory/code/computer_use.py click x y",
+        "   python3 memory/code/computer_use.py double_click x y",
+        "   先截图确定坐标，然后点击",
+        "",
+        "3. 键盘输入（打字）：",
+        "   python3 memory/code/computer_use.py type \"要输入的内容\"",
+        "   python3 memory/code/computer_use.py press enter",
+        "   python3 memory/code/computer_use.py hotkey ctrl c",
+        "",
+        "4. 浏览器自动化（Playwright MCP）：",
+        "   启动浏览器 → 打开URL → 点击元素 → 填表单 → 截图验证",
+        "   适合：小红书/抖音/公众号等Web端操作",
+        "",
+        "5. 执行命令：",
+        "   python3 memory/code/computer_use.py run \"cmd命令\"",
+        "   python3 memory/code/computer_use.py open_app notepad",
+        "   python3 memory/code/computer_use.py open_url https://...",
+        "",
+        "配合使用场景：",
+        "  场景A - 浏览器采集：Playwright打开网页 → screenshot看结果 → 分析→继续操作",
+        "  场景B - 桌面软件控制：screenshot看界面 → 找按钮位置 → click点击",
+        "  场景C - 自动化办公：open_app Excel → type输入数据 → screenshot验证",
+        "",
+        "限制：",
+        "  - 需要Python3环境（已装）",
+        "  - 鼠标坐标需要先截图确定",
+        "  - UAC弹窗/管理员权限弹窗需要手动点",
+        "  - 不能物理插拔USB设备"
+      ],
+      "tools": ["pyautogui", "mss", "Pillow", "Playwright"],
+      "notes": "这套能力层让老子能'看'到屏幕并'动手'操作，补上了和Codex CLI最大的能力差距。截图+分析+执行闭环实现全自动控制。PYTHONIOENCODING=utf-8前缀解决Windows中文乱码"
     }
   ]
 }
