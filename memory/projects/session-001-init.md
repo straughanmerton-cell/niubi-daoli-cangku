@@ -4,7 +4,7 @@
 **状态**: ✅ 完成
 
 ## 完成内容
-- [x] 创建 seagull-brain GitHub 仓库
+- [x] 创建 niubi-daoli-cangku GitHub 仓库（原名 seagull-brain）
 - [x] 搭建记忆库目录结构
 - [x] 编写预检/后审钩子脚本
 - [x] 写入初始代码经验5条

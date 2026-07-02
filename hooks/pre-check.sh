@@ -2,11 +2,11 @@
 # 海鸥干活前检查脚本
 # 作用：查记忆库、查版本、避免重复造轮子
 
-SEAGULL_BRAIN="/c/Users/Administrator/seagull-brain"
-MEMORY="$SEAGULL_BRAIN/memory"
-VERSIONS="$SEAGULL_BRAIN/versions"
+REPO_PATH="/c/Users/Administrator/niubi-daoli-cangku"
+MEMORY="$REPO_PATH/memory"
+VERSIONS="$REPO_PATH/versions"
 
-echo "🔍 海鸥预检..."
+echo "🔍 牛逼预检..."
 
 # 1. 检查记忆库
 if [ -f "$MEMORY/projects/last-session.md" ]; then

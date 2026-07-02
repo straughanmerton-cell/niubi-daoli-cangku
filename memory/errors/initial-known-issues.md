@@ -1,5 +1,9 @@
 # 已知问题 & 解决方案
 
+## 0. 仓库改过名
+**问题**: 仓库从 seagull-brain 改名为 niubi-daoli-cangku
+**解决**: 记得更新本地目录名和git remote URL
+
 ## 1. Git Bash 路径问题
 **问题**: `gh` 命令在Git Bash中PATH不包含`/c/Program Files/GitHub CLI/`
 **解决**: 用全路径 `/c/Program Files/GitHub CLI/gh` 或添加PATH
