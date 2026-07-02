@@ -1,5 +1,125 @@
 {
-  "description": "海鸥工具注册表 - 记录所有已安装工具的信息、版本和用途",
+  "description": "牛逼倒立仓库工具注册表 - 记录所有已安装工具的信息、版本和用途",
   "last_updated": "2026-07-02",
-  "tools": {}
+  "tools": {
+    "nuclei": {
+      "version": "v3.10.0",
+      "category": "漏洞扫描",
+      "description": "模板化漏洞扫描器，支持CVE/配置错误/泄露扫描",
+      "usage": "nuclei -u target.com -t cves/",
+      "path": "go/bin/nuclei.exe"
+    },
+    "httpx": {
+      "version": "latest",
+      "category": "信息收集",
+      "description": "HTTP探测工具，批量检测存活Web服务",
+      "usage": "httpx -l urls.txt -status-code -title",
+      "path": "go/bin/httpx.exe"
+    },
+    "ffuf": {
+      "version": "v2.1.0-dev",
+      "category": "模糊测试",
+      "description": "目录/参数/子域名模糊测试",
+      "usage": "ffuf -w wordlist.txt -u https://target.com/FUZZ",
+      "path": "go/bin/ffuf.exe"
+    },
+    "subfinder": {
+      "version": "v2.14.0",
+      "category": "信息收集",
+      "description": "被动子域名枚举",
+      "usage": "subfinder -d target.com",
+      "path": "go/bin/subfinder.exe"
+    },
+    "gau": {
+      "version": "v2.2.4",
+      "category": "信息收集",
+      "description": "从多个源拉取历史URL",
+      "usage": "gau target.com",
+      "path": "go/bin/gau.exe"
+    },
+    "katana": {
+      "version": "latest",
+      "category": "信息收集",
+      "description": "Web爬虫，自动发现端点",
+      "usage": "katana -u https://target.com",
+      "path": "go/bin/katana.exe"
+    },
+    "interactsh-client": {
+      "version": "latest",
+      "category": "漏洞利用辅助",
+      "description": "带外交互客户端，检测SSRF/盲注/带外漏洞",
+      "usage": "interactsh-client",
+      "path": "go/bin/interactsh-client.exe"
+    },
+    "rustscan": {
+      "version": "latest",
+      "category": "端口扫描",
+      "description": "超快速端口扫描器",
+      "usage": "rustscan -a target.com",
+      "path": "cargo/bin/rustscan.exe"
+    },
+    "sqlmap": {
+      "version": "latest",
+      "category": "Web渗透",
+      "description": "SQL注入自动检测与利用",
+      "usage": "sqlmap -u https://target.com?id=1",
+      "path": "Python Scripts/sqlmap"
+    },
+    "impacket": {
+      "version": "0.13.1",
+      "category": "内网渗透",
+      "description": "AD协议工具集，包含psexec/secretsdump/smbexec等",
+      "usage": "impacket-psexec user@target",
+      "path": "Python库"
+    },
+    "mitmproxy": {
+      "version": "11.0.2",
+      "category": "协议分析",
+      "description": "中间人代理，抓包改包分析通信协议",
+      "usage": "mitmproxy --listen-port 8080",
+      "path": "Python工具"
+    },
+    "arjun": {
+      "version": "2.2.7",
+      "category": "信息收集",
+      "description": "HTTP参数发现工具",
+      "usage": "arjun -u https://target.com",
+      "path": "Python工具"
+    },
+    "pypykatz": {
+      "version": "0.6.13",
+      "category": "凭证提取",
+      "description": "Python版Mimikatz，提取系统凭证",
+      "usage": "pypykatz lsa minidump lsass.dmp",
+      "path": "Python库"
+    },
+    "lsassy": {
+      "version": "3.1.16",
+      "category": "内网渗透",
+      "description": "远程从LSASS提取凭证",
+      "usage": "lsassy target.com user:pass",
+      "path": "Python工具"
+    },
+    "deslint": {
+      "version": "latest",
+      "category": "审查纠错",
+      "description": "MCP预写验证门 + Agent Action Firewall",
+      "usage": "MCP服务器，自动触发",
+      "path": "MCP服务器"
+    },
+    "vibecop": {
+      "version": "latest",
+      "category": "审查纠错",
+      "description": "AI代码质量检测，35个检测器",
+      "usage": "MCP服务器，自动触发",
+      "path": "MCP服务器"
+    },
+    "mcp-memory-graph": {
+      "version": "2.10.2",
+      "category": "记忆系统",
+      "description": "知识图谱记忆系统，51个工具，向量搜索+图谱+自动学习",
+      "usage": "MCP服务器，自动触发",
+      "path": "MCP服务器"
+    }
+  }
 }

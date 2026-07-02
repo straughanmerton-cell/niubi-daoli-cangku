@@ -1,14 +1,45 @@
 {
-  "description": "海鸥工具版本追踪 - 每次干活前检查版本一致性",
+  "description": "牛逼倒立仓库工具版本追踪 - 每次干活前检查版本一致性",
   "last_updated": "2026-07-02",
   "environment": {
     "os": "Windows 11 Pro for Workstations (10.0.28000)",
     "shell": "Git Bash (MINGW64)"
   },
-  "compilers": {},
-  "python_tools": {},
-  "go_tools": {},
-  "npm_tools": {},
-  "rust_tools": {},
-  "other_tools": {}
+  "compilers": {
+    "go": "1.26.4",
+    "rust": "1.96.1",
+    "node": "24.17.0",
+    "python": "3.11"
+  },
+  "go_tools": {
+    "nuclei": "v3.10.0",
+    "httpx": "latest",
+    "ffuf": "v2.1.0-dev",
+    "subfinder": "v2.14.0",
+    "gau": "v2.2.4",
+    "katana": "latest",
+    "interactsh-client": "latest"
+  },
+  "python_tools": {
+    "sqlmap": "latest",
+    "impacket": "0.13.1",
+    "mitmproxy": "11.0.2",
+    "arjun": "2.2.7",
+    "pypykatz": "0.6.13",
+    "lsassy": "3.1.16"
+  },
+  "rust_tools": {
+    "rustscan": "latest"
+  },
+  "npm_tools": {
+    "deslint": "latest",
+    "vibecop": "latest",
+    "mcp-memory-graph": "2.10.2",
+    "js-beautify": "latest",
+    "eslint": "latest"
+  },
+  "other_tools": {
+    "gh": "2.95.0",
+    "git": "bundled with MINGW64"
+  }
 }
