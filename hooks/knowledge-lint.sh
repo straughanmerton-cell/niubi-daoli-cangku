@@ -3,7 +3,7 @@
 # 用法: bash knowledge-lint.sh [--fix]
 # 检查: 重复条目/孤立条目/过期条目/矛盾条目
 
-REPO="/c/Users/Administrator/niubi-daoli-cangku"
+REPO="/d/niubi-daoli-cangku"
 PATTERNS="$REPO/memory/resources/patterns.json"
 ERRORS="$REPO/memory/archives/errors"
 DECISIONS="$REPO/memory/decisions"
