@@ -1,5 +1,53 @@
 {
   "description": "踩坑记录 - 遇到过的错误和解决方案",
   "last_updated": "2026-07-02",
-  "errors": []
+  "errors": [
+    {
+      "id": "ERR-001",
+      "date": "2026-07-02",
+      "error": "git push origin main 超时exit 128",
+      "root_cause": "git没有凭证缓存，需要交互式输入",
+      "solution": "gh auth setup-git 配置凭证helper，或gh auth token获取token",
+      "prevention": "装完gh第一时间配 auth setup-git"
+    },
+    {
+      "id": "ERR-002",
+      "date": "2026-07-02",
+      "error": "重构PARA结构后路径引用失效",
+      "root_cause": "memory/code/patterns.json → memory/resources/patterns.json 忘了更新引用",
+      "solution": "grep -r '旧路径' . 找到所有引用并更新",
+      "prevention": "移动文件后全局搜旧路径"
+    },
+    {
+      "id": "ERR-003",
+      "date": "2026-07-02",
+      "error": "pip安装报 OSError: Invalid argument",
+      "root_cause": "Windows权限问题，不能写 C:\\Program Files\\Python311\\Scripts\\",
+      "solution": "pip3 install --no-compile 跳过脚本安装",
+      "prevention": "Windows下装Python包默认加--no-compile"
+    },
+    {
+      "id": "ERR-004",
+      "date": "2026-07-02",
+      "error": "ffuf --version报错，参数名不对",
+      "root_cause": "ffuf用 -V 不是 --version",
+      "solution": "ffuf -V",
+      "prevention": "查工具版本前先 tool --help 看参数"
+    },
+    {
+      "id": "ERR-005",
+      "date": "2026-07-02",
+      "error": "knowledge-compile.sh 关键词搜索不到匹配条目",
+      "root_cause": "patterns.json路径变了但脚本没更新",
+      "solution": "更新脚本中的PATTERNS路径变量",
+      "prevention": "重构后跑一次knowledge-lint.sh全面检查"
+    }
+  ],
+  "principles": [
+    "改路径必搜引用 - 移动/改名文件后，全局搜旧路径",
+    "查版本先看help - 不同工具的参数格式不统一",
+    "Windows权限问题 - 装Python包加--no-compile",
+    "git凭证要提前配 - 装完gh就配auth setup-git",
+    "重构后跑lint - 改完结构跑一次knowledge-lint.sh验证"
+  ]
 }
