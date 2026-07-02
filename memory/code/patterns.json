@@ -1,0 +1,63 @@
+{
+  "description": "海鸥代码经验库 - 记录写过的代码模式和经验",
+  "last_updated": "2026-07-02",
+  "patterns": [
+    {
+      "id": "unity-il2cpp-hook",
+      "category": "游戏逆向",
+      "description": "Unity IL2CPP游戏Hook流程",
+      "steps": [
+        "用Il2CppDumper dump global-metadata.dat + libil2cpp.so",
+        "用IDA分析dump.cs找目标类和偏移",
+        "用Frida或C++注入器Hook"
+      ],
+      "notes": "IL2CPP的metadata版本必须匹配，否则dump出来的偏移不对"
+    },
+    {
+      "id": "unreal-dump-sdk",
+      "category": "游戏逆向",
+      "description": "Unreal Engine游戏dump SDK",
+      "steps": [
+        "用UE4SS注入游戏",
+        "用Dumpers插件dump UObject",
+        "生成SDK头文件"
+      ],
+      "notes": "UE4SS版本要和游戏引擎版本匹配"
+    },
+    {
+      "id": "memory-address-find",
+      "category": "内存修改",
+      "description": "找游戏内存地址通用方法",
+      "steps": [
+        "CE搜血量/坐标/经验值",
+        "找基址+偏移链",
+        "验证地址稳定性"
+      ],
+      "notes": "多级指针偏移在游戏更新后可能变，要重新找"
+    },
+    {
+      "id": "mitm-proxy-analyze",
+      "category": "协议分析",
+      "description": "中间人抓包分析游戏通信协议",
+      "steps": [
+        "启动mitmproxy监听8080",
+        "设置客户端代理到本地",
+        "安装mitmproxy CA证书",
+        "分析请求/响应结构",
+        "识别加密/编码算法"
+      ],
+      "notes": "私服可能用自定义加密，需要先逆向解密函数"
+    },
+    {
+      "id": "nuclei-scan",
+      "category": "漏洞扫描",
+      "description": "Nuclei模板化扫描",
+      "steps": [
+        "nuclei -u target.com -t cves/",
+        "nuclei -u target.com -t exposures/",
+        "nuclei -u target.com -t misconfigurations/"
+      ],
+      "notes": "先httpx探测存活，再nuclei扫描，效率更高"
+    }
+  ]
+}

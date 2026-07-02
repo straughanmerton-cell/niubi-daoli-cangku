@@ -1,0 +1,14 @@
+{
+  "description": "海鸥工具版本追踪 - 每次干活前检查版本一致性",
+  "last_updated": "2026-07-02",
+  "environment": {
+    "os": "Windows 11 Pro for Workstations (10.0.28000)",
+    "shell": "Git Bash (MINGW64)"
+  },
+  "compilers": {},
+  "python_tools": {},
+  "go_tools": {},
+  "npm_tools": {},
+  "rust_tools": {},
+  "other_tools": {}
+}
